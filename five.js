@@ -235,9 +235,51 @@ var flat = arOfAr.reduce(function(a, b) {
     return a.concat(b);
 });
 
-var gens = ancestry
-            .filter(function (person){ return (person.died - person.born) > 90 })
-            .map(function(person) { return (person.died - person.born) });
+
+function groupBy(array, groupOf) {
+    var groups = {};
+    array.forEach(function(element) {
+        var groupName = groupOf(element);
+        if (groupName in groups)
+            groups[groupName].push(element);
+        else
+            groups[groupName] = [element];
+    });
+
+    return groups;
 
 
-console.log(gens);
+}
+
+var byCentury = groupBy(ancestry, function(person) {
+    return Math.ceil(person.died / 100);
+});
+
+// for (var century in byCentury) {
+//     var ages = byCentury[century].map(function(person) {
+//         return person.died - person.born;
+//     });
+//     console.log("century: " + century + " average: " + average(ages));
+// }
+
+function some(array, predicate) {
+    for (var i = 0; i < array.length; i ++)
+        if (predicate(array[i]))
+            return true;
+    return false;
+}
+
+function every(array, predicate) {
+    for (var i = 0; i < array.length; i ++)
+        if (!predicate(array[i]))
+            return false;
+    return true;
+}
+
+
+function isBiggerThan10(element) {
+  return element > 10;
+}
+
+console.log(every([17, 16, 19], isBiggerThan10));
+
