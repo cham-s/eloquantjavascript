@@ -180,8 +180,6 @@ function dataTable(data) {
     return [headers].concat(body);
 }
 
-
-
 var pile = {
     elements: ["eggshell", "orange peel", "worm"],
     get height() {
