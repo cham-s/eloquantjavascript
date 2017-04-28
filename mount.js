@@ -176,3 +176,13 @@ function col(rows) {
 
 console.log(drawTable(dataTable(MOUNTAINS)));
 
+function logFive(seq) {
+    if (seq.length > 5) {
+        for (var i = 0 ; i < 5; i++)
+            console.log(seq.current());
+    } else {
+        for (var i = 0; i < seq.length; i++)
+            console.log(seq.current());
+    }
+}
+
