@@ -38,12 +38,6 @@ Grid.prototype.forEach = function(f, context) {
     }
 };
 
-// // Test so far
-// var grid = new Grid(5, 5);
-// console.log(grid.get(new Vector(1, 1)));
-// grid.set(new Vector(1, 1), "X");
-// console.log(grid.get(new Vector(1, 1)));
-
 var directions = {
     "n": new Vector(0, -1),
     "ne": new Vector(1, -1),
@@ -92,8 +86,9 @@ function World(map, legend){
     this.legend = legend;
 
     map.forEach(function(line, y) {
-        for (var x = 0; x < line.height; x++)
+        for (var x = 0; x < line.length; x++) {
             grid.set(new Vector(x, y), elementFromchar(legend, line[x]));
+        }
     });
 }
 
@@ -111,14 +106,77 @@ World.prototype.toString = function() {
 
 function Wall() {}
 
-var test = {
-    prop: 10,
-    addProto: function(array) {
-        return array.map(function(elt){
-            return this.prop + elt;
-        }, this);
+World.prototype.turn = function() {
+    var acted = [];
+    this.grid.forEach(function(criter, vector) {
+        if (criter.act && acted.indexOf(criter) == -1) {
+            acted.push(criter);
+            this.letAct(critter, vector);
+        }
+    }, this);
+};
+
+World.prototype.letAct = function(critter, vector) {
+    var action = critter.act(new View(this, vector));
+    if (action && action.type == "move") {
+        var dest = this.checkDestination(action, vector);
+        if (dest && this.grid.get(dest) == null) {
+            this.grid.set(vector, null);
+            this.grid.set(dest, critter);
+        }
     }
 };
 
+World.prototype.checkDestination = function(action, vector) {
+    if (directions.hasOwnProperty(action.direction)) {
+        var dest = vector.plus(directions[action.direction]);
+        if (this.grid.isInside(dest));
+            return dest;
+    }
+};
 
-console.log(test.addProto([5]));
+function View(world, vector) {
+    this.world = world;
+    this.vector = vector;
+}
+
+View.prototype.look = function(dir) {
+    var target = this.vector.plus(direction[dir]);
+    if (this.world.grid.isInside(target))
+        return charFromElement(this.world.grid.get(target));
+    else
+        return "#";
+}
+
+View.prototype.findAll = function(ch) {
+    var found = [];
+    for (var dir in directions)
+        if (this.look(dir) == ch)
+            found.push(dir);
+    return found;
+};
+
+View.prototype.find = function(ch) {
+    var found = this.findAll(ch);
+    if (found.length == 0) return null;
+    return randomElement(found);
+};
+
+var plan = ["############################",
+            "#      #    #      o      ##",
+            "#                          #",
+            "#          #####           #",
+            "##         #   #    ##     #",
+            "###           ##     #     #",
+            "#           ###      #     #",
+            "#   ####                   #",
+            "#   ##       o             #",
+            "# o  #         o       ### #",
+            "#    #                     #",
+            "############################"];
+
+var world = new World(plan, {"#": Wall,
+                             "o": BouncingCritter});
+
+console.log(world.toString());
+
