@@ -108,9 +108,9 @@ function Wall() {}
 
 World.prototype.turn = function() {
     var acted = [];
-    this.grid.forEach(function(criter, vector) {
-        if (criter.act && acted.indexOf(criter) == -1) {
-            acted.push(criter);
+    this.grid.forEach(function(critter, vector) {
+        if (critter.act && acted.indexOf(critter) == -1) {
+            acted.push(critter);
             this.letAct(critter, vector);
         }
     }, this);
@@ -141,7 +141,7 @@ function View(world, vector) {
 }
 
 View.prototype.look = function(dir) {
-    var target = this.vector.plus(direction[dir]);
+    var target = this.vector.plus(directions[dir]);
     if (this.world.grid.isInside(target))
         return charFromElement(this.world.grid.get(target));
     else
@@ -178,5 +178,36 @@ var plan = ["############################",
 var world = new World(plan, {"#": Wall,
                              "o": BouncingCritter});
 
-console.log(world.toString());
+function dirPlus(dir, n) {
+    var index = directionsNames.indexOf(dir);
+    return directionsNames[(index + n + 8) % 8]
+}
+
+function WallFollower() {
+    this.dir = "s"
+}
+
+WallFollower.prototype.act = function(view) {
+    var start = this.dir;
+    if (view.look(dirPlus(this.dir, -3)) != " ")
+        start = this.dir = dirPlus(this.dir, -2);
+    while (view.look(this.dir) != " ") {
+        this.dir = dirPlus(this.dir, 1);
+        if (this.dir == start) break;
+    }
+    return {type: "move", direction: this.dir}
+};
+
+for (var i = 0; i < 5; i++) {
+    world.turn();
+    console.log(world.toString())
+}
+
+function LifelikeWorld(map, legend) {
+    World.call(this, map, legend);
+}
+
+LifelikeWorld.prototype = Object.create(World.prototype);
+
+var actionTypes = Object.create(null);
 
